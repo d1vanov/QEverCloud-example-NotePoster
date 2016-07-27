@@ -21,7 +21,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QStringList names;
     QString defualtNotebook;
     QList<Notebook> nl = noteStore->listNotebooks();
-    for(int i = 0; i < nl.length(); i++) {
+    int numNotebooks = nl.length();
+    names.reserve(numNotebooks);
+    for(int i = 0; i < numNotebooks; i++) {
         const Notebook& n = nl.at(i);
         notebooks[n.name] = n.guid;
         names << n.name;
