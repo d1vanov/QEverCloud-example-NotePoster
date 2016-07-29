@@ -72,20 +72,39 @@ if(APPLE)
     execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MACOSX_BUNDLE_ICON} ${MACOSX_BUNDLE_RESOURCES})
 endif()
 
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE ${HEADERS} ${SOURCES} ${${PROJECT_NAME}_FORMS_HEADERS})
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE WIN32 ${HEADERS} ${SOURCES} ${${PROJECT_NAME}_FORMS_HEADERS})
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QEVERCLOUD_LIBS})
+
+if(NOT CMAKE_INSTALL_PREFIX)
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR})
+endif()
 
 set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}")
 if(APPLE)
   set(APPS "\${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app")
 endif()
+if(WIN32)
+  set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.exe")
+endif()
 
-install(TARGETS ${PROJECT_NAME}
-        BUNDLE DESTINATION . COMPONENT Runtime
-        RUNTIME DESTINATION bin COMPONENT Runtime)
+if(APPLE OR WIN32)
+  install(TARGETS ${PROJECT_NAME}
+          BUNDLE DESTINATION . COMPONENT Runtime
+          RUNTIME DESTINATION bin COMPONENT Runtime)
 
-set(DIRS ${QT_LIBRARY_DIRS})
-install(CODE "
-        include(BundleUtilities)
-        fixup_bundle(\"${APPS}\"   \"\"   \"${DIRS}\")
-        " COMPONENT Runtime)
+  set(DIRS ${QT_LIBRARY_DIR})
+  get_filename_component(QEVERCLOUD_DIR ${QEVERCLOUD_LIBS} DIRECTORY)
+  list(APPEND DIRS ${QEVERCLOUD_DIR})
+
+  set(LIBS ${QT_LIBRARIES})
+  list(REMOVE_ITEM LIBS "optimized")
+  list(REMOVE_ITEM LIBS "debug")
+  list(APPEND LIBS ${QEVERCLOUD_LIBS})
+
+  install(CODE "
+  include(BundleUtilities)
+  fixup_bundle(\"${APPS}\"   \"${LIBS}\"   \"${DIRS}\")
+  " COMPONENT Runtime)
+else()
+  install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+endif()
