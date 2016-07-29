@@ -1,92 +1,94 @@
-
-
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "settings.h"
-
+#include "Settings.h"
 #include <QMessageBox>
 
 using namespace qevercloud;
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget * parent) :
     QDialog(parent),
-    ui(new Ui::MainWindow),
-    inCycle_(false)
+    m_pUi(new Ui::MainWindow),
+    m_inLoop(false)
 {
-    ui->setupUi(this);
+    m_pUi->setupUi(this);
 
-    noteStore = new NoteStore(settings()->noteStoreUrl(), settings()->authenticationToken(), this);
+    m_pNoteStore = new NoteStore(settings()->noteStoreUrl(), settings()->authenticationToken(), this);
 
     // reading notebook names and guids
-    QStringList names;
-    QString defualtNotebook;
-    QList<Notebook> nl = noteStore->listNotebooks();
-    int numNotebooks = nl.length();
-    names.reserve(numNotebooks);
-    for(int i = 0; i < numNotebooks; i++) {
-        const Notebook& n = nl.at(i);
-        notebooks[n.name] = n.guid;
-        names << n.name;
-        if(n.defaultNotebook) defualtNotebook = n.name;
+    QStringList notebookNames;
+    QString defaultNotebookName;
+    QList<Notebook> notebooksList = m_pNoteStore->listNotebooks();
+    int numNotebooks = notebooksList.length();
+    notebookNames.reserve(numNotebooks);
+    for(int i = 0; i < numNotebooks; i++)
+    {
+        const Notebook & notebook = notebooksList.at(i);
+        m_notebooks[notebook.name] = notebook.guid;
+        notebookNames << notebook.name;
+        if (notebook.defaultNotebook) {
+            defaultNotebookName = notebook.name;
+        }
     }
-    qSort(names);
-    ui->notebooksComboBox->addItems(names);
-    ui->notebooksComboBox->setCurrentIndex(names.indexOf(defualtNotebook));
+    qSort(notebookNames);
+    m_pUi->notebooksComboBox->addItems(notebookNames);
+    m_pUi->notebooksComboBox->setCurrentIndex(notebookNames.indexOf(defaultNotebookName));
 
-    connect(ui->noteTextEdit, SIGNAL(currentCharFormatChanged(QTextCharFormat)), SLOT(currentCharFormatChanged(QTextCharFormat)));
+    connect(m_pUi->noteTextEdit, SIGNAL(currentCharFormatChanged(QTextCharFormat)), SLOT(currentCharFormatChanged(QTextCharFormat)));
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete m_pUi;
 }
 
 void MainWindow::setBold(bool yes)
 {
-    if(!inCycle_) {
-       ui->noteTextEdit->setFontWeight(yes ? QFont::Bold : QFont::Normal);
+    if (!m_inLoop) {
+        m_pUi->noteTextEdit->setFontWeight(yes ? QFont::Bold : QFont::Normal);
     }
 }
 
 void MainWindow::setItalic(bool yes)
 {
-    if(!inCycle_) {
-       ui->noteTextEdit->setFontItalic(yes);
+    if (!m_inLoop) {
+        m_pUi->noteTextEdit->setFontItalic(yes);
     }
 }
 
-void MainWindow::currentCharFormatChanged(QTextCharFormat f)
+void MainWindow::currentCharFormatChanged(QTextCharFormat format)
 {
-    Q_UNUSED(f)
-    inCycle_ = true;
-    ui->boldButton->setChecked(ui->noteTextEdit->fontWeight() >= QFont::Bold);
-    ui->italicButton->setChecked(ui->noteTextEdit->fontItalic());
-    inCycle_ = false;
+    Q_UNUSED(format)
+
+    m_inLoop = true;
+    m_pUi->boldButton->setChecked(m_pUi->noteTextEdit->fontWeight() >= QFont::Bold);
+    m_pUi->italicButton->setChecked(m_pUi->noteTextEdit->fontItalic());
+    m_inLoop = false;
 }
 
 void MainWindow::createNote()
 {
-    // For the sake of simplicity I do not handle images
-    // and ENML extensions
-    QString enml = ui->noteTextEdit->toHtml();
+    // For the sake of simplicity do not handle images and ENML extensions
+    QString enml = m_pUi->noteTextEdit->toHtml();
     enml = enml.mid(enml.indexOf("<body "));
     enml.replace("<body ", "<en-note ");
     enml = enml.left(enml.indexOf("</body>"));
     enml += "</en-note>";
 
-    // the xml header must always be peresent
-    enml = QString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-            + "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n"
-            + enml;
+    // the xml header must always be present
+    enml.prepend("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                 "<!DOCTYPE en-note SYSTEM \"http://xml.evernote.com/pub/enml2.dtd\">\n");
 
-    try {
+    try
+    {
         Note note;
-        note.title = ui->titleLineEdit->text().trimmed().left(EDAM_NOTE_TITLE_LEN_MAX);
-        note.notebookGuid = notebooks[ui->notebooksComboBox->currentText()];
+        note.title = m_pUi->titleLineEdit->text().trimmed().left(EDAM_NOTE_TITLE_LEN_MAX);
+        note.notebookGuid = m_notebooks[m_pUi->notebooksComboBox->currentText()];
         note.content = enml;
-        note = noteStore->createNote(note);
+        note = m_pNoteStore->createNote(note);
         QMessageBox::information(this, "Success", QString("Note GUID: %1").arg(note.guid));
-    } catch(const std::exception& e) {
+    }
+    catch(const std::exception & e)
+    {
         QMessageBox::critical(this, "Failure", e.what());
     }
 }

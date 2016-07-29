@@ -1,12 +1,13 @@
-#ifndef NOTEPOSTER_SETTINGS_H
-#define NOTEPOSTER_SETTINGS_H
+#ifndef QEVERCLOUD_EXAMPLE_NOTE_POSTER_SETTINGS_H
+#define QEVERCLOUD_EXAMPLE_NOTE_POSTER_SETTINGS_H
 
 #include <QObject>
 #include <QString>
 
 class QSettings;
 
-class Settings: public QObject {
+class Settings: public QObject
+{
 public:
     Settings();
 
@@ -26,9 +27,9 @@ public:
     void setAuthenticationToken(QString value);
 
 private:
-  QSettings* st_;
+    QSettings * m_settings;
 };
 
-Settings* settings();
+Settings * settings();
 
-#endif // NOTEPOSTER_SETTINGS_H
+#endif // QEVERCLOUD_EXAMPLE_NOTE_POSTER_SETTINGS_H

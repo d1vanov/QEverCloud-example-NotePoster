@@ -1,4 +1,3 @@
-
 #include "MainWindow.h"
 #include <QApplication>
 #include <QMessageBox>
@@ -7,50 +6,61 @@
 
 using namespace qevercloud;
 
-class NotePosterApplication: public QApplication {
+class NotePosterApplication: public QApplication
+{
 public:
-    bool notify(QObject* o, QEvent * e);
+    bool notify(QObject * pObject, QEvent * pEvent);
 };
 
-bool NotePosterApplication::notify(QObject *o, QEvent *e)
+bool NotePosterApplication::notify(QObject * pObject, QEvent * pEvent)
 {
-    try {
-        return QApplication::notify(o, e);
-    } catch(const std::exception& e)  {
-        qDebug() << e.what();
+    try
+    {
+        return QApplication::notify(pObject, pEvent);
+    }
+    catch(const std::exception & exception)
+    {
+        qDebug() << exception.what();
         quit();
-    } catch(...) {
+    }
+    catch(...)
+    {
         qDebug() << "Unknown exception";
         quit();
     }
+
     return false;
 }
 
-int main(int argc, char *argv[])
-try
+int main(int argc, char * argv[])
 {
-    // qrand is used for nonce generation by default
-    // so qsrand must be called in the default case
-    qsrand(QDateTime::currentMSecsSinceEpoch() % static_cast<quint64>(256)*256*256*256);
+    try
+    {
+        // qrand is used for nonce generation by default
+        // so qsrand must be called in the default case
+        qsrand(QDateTime::currentMSecsSinceEpoch() % static_cast<quint64>(256)*256*256*256);
 
-    QApplication a(argc, argv);
+        QApplication app(argc, argv);
 
-    SettingsDialog d;
-    if(d.exec() != QDialog::Accepted) return 0;
+        SettingsDialog settingsDialog;
+        if (settingsDialog.exec() != QDialog::Accepted) {
+            return 0;
+        }
 
-    MainWindow w;
-    w.show();
+        MainWindow window;
+        window.show();
 
-    return a.exec();
-} catch(const std::exception& e) {
-    qDebug() << e.what();
-    return 1;
-} catch(...) {
-    qDebug() << "Unknown exception";
-    return 1;
+        return app.exec();
+    }
+    catch(const std::exception & exception)
+    {
+        qDebug() << exception.what();
+        return 1;
+    }
+    catch(...)
+    {
+        qDebug() << "Unknown exception";
+        return 1;
+    }
 }
-
-
-
-
 

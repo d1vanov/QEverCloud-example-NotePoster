@@ -1,45 +1,49 @@
 #include "SettingsDialog.h"
 #include "ui_SettingsDialog.h"
+#include "Settings.h"
 #include <QEverCloudOAuth.h>
 #include <QMessageBox>
-#include "settings.h"
 
 using namespace qevercloud;
 
-SettingsDialog::SettingsDialog(QWidget *parent) :
+SettingsDialog::SettingsDialog(QWidget * parent) :
     QDialog(parent),
-    ui(new Ui::SettingsDialog)
+    m_pUi(new Ui::SettingsDialog)
 {
-    ui->setupUi(this);
-    ui->hostLineEdit->setText(settings()->host());
-    ui->consumerKeyLineEdit->setText(settings()->consumerKey());
-    ui->consumerSecretLineEdit->setText(settings()->consumerSecret());
-    ui->noteStoreUrlLineEdit->setText(settings()->noteStoreUrl());
-    ui->authenticationTokenLineEdit->setText(settings()->authenticationToken());
+    m_pUi->setupUi(this);
+    m_pUi->hostLineEdit->setText(settings()->host());
+    m_pUi->consumerKeyLineEdit->setText(settings()->consumerKey());
+    m_pUi->consumerSecretLineEdit->setText(settings()->consumerSecret());
+    m_pUi->noteStoreUrlLineEdit->setText(settings()->noteStoreUrl());
+    m_pUi->authenticationTokenLineEdit->setText(settings()->authenticationToken());
 }
 
 SettingsDialog::~SettingsDialog()
 {
-    delete ui;
+    delete m_pUi;
 }
 
 void SettingsDialog::login()
 {
-    EvernoteOAuthDialog d(ui->consumerKeyLineEdit->text().trimmed(), ui->consumerSecretLineEdit->text().trimmed(), ui->hostLineEdit->text().trimmed());
-    d.setWindowTitle("Log in to Evernote");
-    if(d.exec() != QDialog::Accepted) {
-        QMessageBox::critical(0, "NotePoster", "Login failed.\n" + d.oauthError());
+    EvernoteOAuthDialog dialog(m_pUi->consumerKeyLineEdit->text().trimmed(),
+                               m_pUi->consumerSecretLineEdit->text().trimmed(),
+                               m_pUi->hostLineEdit->text().trimmed());
+    dialog.setWindowTitle("Log in to Evernote");
+
+    if (dialog.exec() != QDialog::Accepted) {
+        QMessageBox::critical(0, "NotePoster", "Login failed.\n" + dialog.oauthError());
         return;
     }
-    ui->authenticationTokenLineEdit->setText(d.oauthResult().authenticationToken);
-    ui->noteStoreUrlLineEdit->setText(d.oauthResult().noteStoreUrl);
+
+    m_pUi->authenticationTokenLineEdit->setText(dialog.oauthResult().authenticationToken);
+    m_pUi->noteStoreUrlLineEdit->setText(dialog.oauthResult().noteStoreUrl);
 }
 
 void SettingsDialog::onFinished()
 {
-    settings()->setHost(ui->hostLineEdit->text());
-    settings()->setConsumerKey(ui->consumerKeyLineEdit->text());
-    settings()->setConsumerSecret(ui->consumerSecretLineEdit->text());
-    settings()->setNoteStoreUrl(ui->noteStoreUrlLineEdit->text());
-    settings()->setAuthenticationToken(ui->authenticationTokenLineEdit->text());
+    settings()->setHost(m_pUi->hostLineEdit->text());
+    settings()->setConsumerKey(m_pUi->consumerKeyLineEdit->text());
+    settings()->setConsumerSecret(m_pUi->consumerSecretLineEdit->text());
+    settings()->setNoteStoreUrl(m_pUi->noteStoreUrlLineEdit->text());
+    settings()->setAuthenticationToken(m_pUi->authenticationTokenLineEdit->text());
 }

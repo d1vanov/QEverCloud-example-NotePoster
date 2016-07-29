@@ -1,5 +1,5 @@
-#ifndef MGS_MAINWINDOW_H
-#define MGS_MAINWINDOW_H
+#ifndef QEVERCLOUD_EXAMPLE_NOTE_POSTER_MAIN_WINDOW_H
+#define QEVERCLOUD_EXAMPLE_NOTE_POSTER_MAIN_WINDOW_H
 
 #include <QDialog>
 #include <QEverCloud.h>
@@ -9,12 +9,11 @@ namespace Ui {
 class MainWindow;
 }
 
-class MainWindow : public QDialog
+class MainWindow: public QDialog
 {
     Q_OBJECT
-
 public:
-    explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget * parent = Q_NULLPTR);
     ~MainWindow();
 
 private slots:
@@ -23,10 +22,10 @@ private slots:
     void currentCharFormatChanged(QTextCharFormat f);
     void createNote();
 private:
-    Ui::MainWindow *ui;
-    qevercloud::NoteStore* noteStore;
-    QMap<QString, QString> notebooks;
-    bool inCycle_;
+    Ui::MainWindow * m_pUi;
+    qevercloud::NoteStore * m_pNoteStore;
+    QMap<QString, QString> m_notebooks;
+    bool m_inLoop;
 };
 
-#endif // MGS_MAINWINDOW_H
+#endif // QEVERCLOUD_EXAMPLE_NOTE_POSTER_MAIN_WINDOW_H
