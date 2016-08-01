@@ -124,11 +124,6 @@ if(APPLE OR WIN32)
     endif()
   endif()
 
-  set(LIBS ${QEVERCLOUD_LIBS})
-
-  get_filename_component(QEVERCLOUD_DIR ${QEVERCLOUD_LIBS} DIRECTORY)
-  set(DIRS ${QEVERCLOUD_DIRS})
-
   install(TARGETS ${PROJECT_NAME}
           BUNDLE DESTINATION . COMPONENT Runtime
           RUNTIME DESTINATION bin COMPONENT Runtime)
@@ -141,6 +136,17 @@ if(APPLE OR WIN32)
     elseif(WIN32)
       install(CODE "
       execute_process(COMMAND ${WINDEPLOYQT_APP} ${APPS})
+      " COMPONENT Runtime)
+      if(USE_QT5)
+        set(QEVERCLOUD_LIBNAME libQEverCloud-qt5.dll)
+      else()
+        set(QEVERCLOUD_LIBNAME libQEverCloud-qt4.dll)
+      endif()
+      get_filename_component(QEVERCLOUD_DIR ${QEVERCLOUD_LIBS} DIRECTORY)
+      install(FILES ${QEVERCLOUD_DIR}/../bin/${QEVERCLOUD_LIBNAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+      set(DEPLOYED_QEVERCLOUD_LIB "\${CMAKE_INSTALL_PREFIX}/bin/${QEVERCLOUD_LIBNAME}")
+      install(CODE "
+      execute_process(COMMAND ${WINDEPLOYQT_APP} ${DEPLOYED_QEVERCLOUD_LIB})
       " COMPONENT Runtime)
     endif()
   endif()
