@@ -76,6 +76,25 @@ if(APPLE)
   set(MACOSX_BUNDLE_RESOURCES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/Contents/Resources")
   execute_process(COMMAND ${CMAKE_COMMAND} -E make_directory ${MACOSX_BUNDLE_RESOURCES})
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MACOSX_BUNDLE_ICON} ${MACOSX_BUNDLE_RESOURCES})
+
+  # use, i.e. don't skip the full RPATH for the build tree
+  set(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+  # when building, don't use the install RPATH already
+  # (but later on when installing)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+  set(CMAKE_INSTALL_RPATH "@loader_path")
+
+  # add the automatically determined parts of the RPATH
+  # which point to directories outside the build tree to the install RPATH
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+  # the RPATH to be used when installing, but only if it's not a system directory
+  list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+  if("${isSystemDir}" STREQUAL "-1")
+    set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  endif("${isSystemDir}" STREQUAL "-1")
 endif()
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE WIN32 ${HEADERS} ${SOURCES} ${${PROJECT_NAME}_FORMS_HEADERS})
@@ -93,24 +112,38 @@ if(APPLE OR WIN32)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.exe")
   endif()
 
-  set(LIBS ${QT_LIBRARIES})
-  list(REMOVE_ITEM LIBS "optimized")
-  list(REMOVE_ITEM LIBS "debug")
-  list(APPEND LIBS ${QEVERCLOUD_LIBS})
-  list(REMOVE_DUPLICATES LIBS)
+  if(USE_QT5)
+    if(APPLE)
+      set (MACDEPLOYQT_APP ${Qt5Core_DIR}/../../../bin/macdeployqt)
+      message(" - macdeployqt path: ${MACDEPLOYQT_APP}")
+    endif()
+    # we need to find path to windeployqt on windows
+    if (WIN32)
+      set (WINDEPLOYQT_APP ${Qt5Core_DIR}/../../../bin/windeployqt)
+      message(" - windeployqt path: ${WINDEPLOYQT_APP}")
+    endif()
+  endif()
 
-  set(DIRS ${QT_LIBRARY_DIR})
+  set(LIBS ${QEVERCLOUD_LIBS})
+
   get_filename_component(QEVERCLOUD_DIR ${QEVERCLOUD_LIBS} DIRECTORY)
-  list(APPEND DIRS ${QEVERCLOUD_DIR})
+  set(DIRS ${QEVERCLOUD_DIRS})
 
   install(TARGETS ${PROJECT_NAME}
           BUNDLE DESTINATION . COMPONENT Runtime
           RUNTIME DESTINATION bin COMPONENT Runtime)
 
-  install(CODE "
-  include(BundleUtilities)
-  fixup_bundle(\"${APPS}\"   \"${LIBS}\"   \"${DIRS}\")
-  " COMPONENT Runtime)
+  if(USE_QT5)
+    if(APPLE)
+      install(CODE "
+      execute_process(COMMAND ${MACDEPLOYQT_APP} ${APPS})
+      " COMPONENT Runtime)
+    elseif(WIN32)
+      install(CODE "
+      execute_process(COMMAND ${WINDEPLOYQT_APP} ${APPS})
+      " COMPONENT Runtime)
+    endif()
+  endif()
 else()
   install(TARGETS ${PROJECT_NAME} DESTINATION bin)
   install(FILES ${PROJECT_SOURCE_DIR}/icons/mainicon.png DESTINATION ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/icons)
