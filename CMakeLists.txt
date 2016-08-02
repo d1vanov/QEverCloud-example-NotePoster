@@ -5,7 +5,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/mo
 include(NotePosterCMakePolicies)
 SET_POLICIES()
 
-
 if("${CMAKE_MAJOR_VERSION}" GREATER "2")
   project(NotePoster
           VERSION 1.0.0)
@@ -21,16 +20,9 @@ endif()
 include(NotePosterSetupQt)
 include(NotePosterCompilerSettings)
 
-if(USE_QT5)
-  find_package(LibQEverCloud-qt5 REQUIRED)
-  include_directories(${LIBQEVERCLOUD_QT5_INCLUDE_DIRS})
-  add_definitions(${LIBQEVERCLOUD_QT5_DEFINITIONS})
-  set(QEVERCLOUD_LIBS ${LIBQEVERCLOUD_QT5_LIBRARIES})
-else()
-  find_package(LibQEverCloud-qt4 REQUIRED)
-  include_directories(${LIBQEVERCLOUD_QT4_INCLUDE_DIRS})
-  set(QEVERCLOUD_LIBS ${LIBQEVERCLOUD_QT4_LIBRARIES})
-endif()
+find_package(QEverCloud REQUIRED)
+include_directories(${QEVERCLOUD_INCLUDE_DIRS})
+set(QEVERCLOUD_LIBS ${QEVERCLOUD_LIBRARIES})
 
 set(HEADERS
     MainWindow.h
@@ -137,14 +129,10 @@ if(APPLE OR WIN32)
       install(CODE "
       execute_process(COMMAND ${WINDEPLOYQT_APP} ${APPS})
       " COMPONENT Runtime)
-      if(USE_QT5)
-        set(QEVERCLOUD_LIBNAME libQEverCloud-qt5.dll)
-      else()
-        set(QEVERCLOUD_LIBNAME libQEverCloud-qt4.dll)
-      endif()
+      set(QEVERCLOUD_DLL libQEverCloud.dll)
       get_filename_component(QEVERCLOUD_DIR ${QEVERCLOUD_LIBS} DIRECTORY)
-      install(FILES ${QEVERCLOUD_DIR}/../bin/${QEVERCLOUD_LIBNAME} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-      set(DEPLOYED_QEVERCLOUD_LIB "\${CMAKE_INSTALL_PREFIX}/bin/${QEVERCLOUD_LIBNAME}")
+      install(FILES ${QEVERCLOUD_DIR}/../bin/${QEVERCLOUD_DLL} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+      set(DEPLOYED_QEVERCLOUD_LIB "\${CMAKE_INSTALL_PREFIX}/bin/${QEVERCLOUD_DLL}")
       install(CODE "
       execute_process(COMMAND ${WINDEPLOYQT_APP} ${DEPLOYED_QEVERCLOUD_LIB})
       " COMPONENT Runtime)

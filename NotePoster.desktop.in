@@ -2,7 +2,7 @@
 Name=@PROJECT_NAME@
 GenericName=Note taking app
 Comment=Example app for quick note taking with Evernote service
-Exec=LD_LIBRARY_PATH=@LIBQEVERCLOUD_ROOT@/lib @CMAKE_INSTALL_PREFIX@/bin/NotePoster
+Exec=@CMAKE_INSTALL_PREFIX@/bin/NotePoster
 Icon=@CMAKE_INSTALL_PREFIX@/share/NotePoster/icons/mainicon.png
 Terminal=false
 Type=Application
