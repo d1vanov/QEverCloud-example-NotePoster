@@ -20,9 +20,13 @@ endif()
 include(NotePosterSetupQt)
 include(NotePosterCompilerSettings)
 
-find_package(QEverCloud REQUIRED)
+if(USE_QT5)
+  find_package(QEverCloud-qt5 REQUIRED)
+else()
+  find_package(QEverCloud-qt4 REQUIRED)
+endif()
+
 include_directories(${QEVERCLOUD_INCLUDE_DIRS})
-set(QEVERCLOUD_LIBS ${QEVERCLOUD_LIBRARIES})
 
 set(HEADERS
     MainWindow.h
@@ -90,7 +94,7 @@ if(APPLE)
 endif()
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE WIN32 ${HEADERS} ${SOURCES} ${${PROJECT_NAME}_FORMS_HEADERS})
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QEVERCLOUD_LIBS})
+target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QEVERCLOUD_LIBRARIES})
 
 # Installation
 if(APPLE OR WIN32)
@@ -129,8 +133,13 @@ if(APPLE OR WIN32)
       install(CODE "
       execute_process(COMMAND ${WINDEPLOYQT_APP} ${APPS})
       " COMPONENT Runtime)
-      set(QEVERCLOUD_DLL libQEverCloud.dll)
-      get_filename_component(QEVERCLOUD_DIR ${QEVERCLOUD_LIBS} DIRECTORY)
+      # It is rather ugly but I don't know a better way really. If you do, please let me know
+      if(USE_QT5)
+        set(QEVERCLOUD_DLL libQEverCloud-qt5.dll)
+      else()
+        set(QEVERCLOUD_DLL libQEverCloud-qt4.dll)
+      endif()
+      get_target_property(QEVERCLOUD_DIR ${QEVERCLOUD_LIBRARIES} LOCATION)
       install(FILES ${QEVERCLOUD_DIR}/../bin/${QEVERCLOUD_DLL} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
       set(DEPLOYED_QEVERCLOUD_LIB "\${CMAKE_INSTALL_PREFIX}/bin/${QEVERCLOUD_DLL}")
       install(CODE "

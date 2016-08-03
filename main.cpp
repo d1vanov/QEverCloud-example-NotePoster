@@ -1,7 +1,7 @@
 #include "MainWindow.h"
+#include "SettingsDialog.h"
 #include <QApplication>
 #include <QMessageBox>
-#include "SettingsDialog.h"
 #include <QtDebug>
 
 using namespace qevercloud;

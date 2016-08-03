@@ -2,8 +2,13 @@
 #define QEVERCLOUD_EXAMPLE_NOTE_POSTER_MAIN_WINDOW_H
 
 #include <QDialog>
-#include <QEverCloud.h>
 #include <QTextCharFormat>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include <QEverCloud-qt4/QEverCloud.h>
+#else
+#include <QEverCloud-qt5/QEverCloud.h>
+#endif
 
 namespace Ui {
 class MainWindow;

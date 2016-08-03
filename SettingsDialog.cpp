@@ -1,7 +1,13 @@
 #include "SettingsDialog.h"
 #include "ui_SettingsDialog.h"
 #include "Settings.h"
-#include <QEverCloudOAuth.h>
+
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+#include <QEverCloud-qt4/QEverCloudOAuth.h>
+#else
+#include <QEverCloud-qt5/QEverCloudOAuth.h>
+#endif
+
 #include <QMessageBox>
 
 using namespace qevercloud;
