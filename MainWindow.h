@@ -5,9 +5,9 @@
 #include <QTextCharFormat>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <QEverCloud-qt4/QEverCloud.h>
+#include <qt4qevercloud/QEverCloud.h>
 #else
-#include <QEverCloud-qt5/QEverCloud.h>
+#include <qt5qevercloud/QEverCloud.h>
 #endif
 
 namespace Ui {

@@ -3,9 +3,9 @@
 #include "Settings.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <QEverCloud-qt4/QEverCloudOAuth.h>
+#include <qt4qevercloud/QEverCloudOAuth.h>
 #else
-#include <QEverCloud-qt5/QEverCloudOAuth.h>
+#include <qt5qevercloud/QEverCloudOAuth.h>
 #endif
 
 #include <QMessageBox>
