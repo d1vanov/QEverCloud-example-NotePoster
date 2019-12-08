@@ -2,11 +2,7 @@
 #include "ui_SettingsDialog.h"
 #include "Settings.h"
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <qt4qevercloud/QEverCloudOAuth.h>
-#else
 #include <qt5qevercloud/QEverCloudOAuth.h>
-#endif
 
 #include <QMessageBox>
 

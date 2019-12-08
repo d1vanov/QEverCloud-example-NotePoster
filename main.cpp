@@ -1,5 +1,8 @@
 #include "MainWindow.h"
 #include "SettingsDialog.h"
+
+#include <qt5qevercloud/Log.h>
+
 #include <QApplication>
 #include <QMessageBox>
 #include <QtDebug>
@@ -41,6 +44,8 @@ int main(int argc, char * argv[])
         qsrand(QDateTime::currentMSecsSinceEpoch() % static_cast<quint64>(256)*256*256*256);
 
         QApplication app(argc, argv);
+
+        qevercloud::setLogger(qevercloud::newStdErrLogger(qevercloud::LogLevel::Trace));
 
         SettingsDialog settingsDialog;
         if (settingsDialog.exec() != QDialog::Accepted) {

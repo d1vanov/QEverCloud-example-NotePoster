@@ -8,6 +8,7 @@ class QSettings;
 
 class Settings: public QObject
 {
+    Q_OBJECT
 public:
     Settings();
 

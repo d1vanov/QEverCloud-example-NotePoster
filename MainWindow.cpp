@@ -12,7 +12,10 @@ MainWindow::MainWindow(QWidget * parent) :
 {
     m_pUi->setupUi(this);
 
-    m_pNoteStore = new NoteStore(settings()->noteStoreUrl(), settings()->authenticationToken(), this);
+    m_pNoteStore.reset(
+        newNoteStore(
+            settings()->noteStoreUrl(),
+            newRequestContext(settings()->authenticationToken(), -1)));
 
     // reading notebook names and guids
     QStringList notebookNames;
@@ -29,11 +32,16 @@ MainWindow::MainWindow(QWidget * parent) :
             defaultNotebookName = notebook.name;
         }
     }
-    qSort(notebookNames);
-    m_pUi->notebooksComboBox->addItems(notebookNames);
-    m_pUi->notebooksComboBox->setCurrentIndex(notebookNames.indexOf(defaultNotebookName));
 
-    connect(m_pUi->noteTextEdit, SIGNAL(currentCharFormatChanged(QTextCharFormat)), SLOT(currentCharFormatChanged(QTextCharFormat)));
+    std::sort(notebookNames.begin(), notebookNames.end());
+
+    m_pUi->notebooksComboBox->addItems(notebookNames);
+    m_pUi->notebooksComboBox->setCurrentIndex(
+        notebookNames.indexOf(defaultNotebookName));
+
+    connect(m_pUi->noteTextEdit,
+            SIGNAL(currentCharFormatChanged(QTextCharFormat)),
+            SLOT(currentCharFormatChanged(QTextCharFormat)));
 }
 
 MainWindow::~MainWindow()

@@ -14,7 +14,6 @@ Settings * settings()
     return pSettings;
 }
 
-
 Settings::Settings()
 {
     QString iniPath = QDir(qApp->applicationDirPath()).absoluteFilePath("NotePoster.ini");

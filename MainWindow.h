@@ -4,11 +4,7 @@
 #include <QDialog>
 #include <QTextCharFormat>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
-#include <qt4qevercloud/QEverCloud.h>
-#else
 #include <qt5qevercloud/QEverCloud.h>
-#endif
 
 namespace Ui {
 class MainWindow;
@@ -28,7 +24,7 @@ private slots:
     void createNote();
 private:
     Ui::MainWindow * m_pUi;
-    qevercloud::NoteStore * m_pNoteStore;
+    qevercloud::INoteStorePtr m_pNoteStore;
     QMap<QString, QString> m_notebooks;
     bool m_inLoop;
 };

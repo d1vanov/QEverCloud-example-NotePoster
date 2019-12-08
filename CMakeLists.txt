@@ -1,30 +1,16 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.5.1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
 include(NotePosterCMakePolicies)
 SET_POLICIES()
 
-if("${CMAKE_MAJOR_VERSION}" GREATER "2")
-  project(NotePoster
-          VERSION 1.0.0)
-else()
-  project(NotePoster)
-  set(PROJECT_VERSION_MAJOR "1")
-  set(PROJECT_VERSION_MINOR "0")
-  set(PROJECT_VERSION_PATCH "0")
-  set(PROJECT_VERSION_COUNT 3)
-  set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
-endif()
+project(NotePoster VERSION 1.0.0)
 
 include(NotePosterSetupQt)
 include(NotePosterCompilerSettings)
 
-if(USE_QT5)
-  find_package(QEverCloud-qt5 REQUIRED)
-else()
-  find_package(QEverCloud-qt4 REQUIRED)
-endif()
+find_package(QEverCloud-qt5 REQUIRED)
 
 include_directories(${QEVERCLOUD_INCLUDE_DIRS})
 
@@ -43,11 +29,7 @@ set(FORMS
     MainWindow.ui
     SettingsDialog.ui)
 
-if(USE_QT5)
-  qt5_wrap_ui(${PROJECT_NAME}_FORMS_HEADERS ${FORMS})
-else()
-  qt4_wrap_ui(${PROJECT_NAME}_FORMS_HEADERS ${FORMS})
-endif()
+qt5_wrap_ui(${PROJECT_NAME}_FORMS_HEADERS ${FORMS})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -94,6 +76,12 @@ if(APPLE)
 endif()
 
 add_executable(${PROJECT_NAME} MACOSX_BUNDLE WIN32 ${HEADERS} ${SOURCES} ${${PROJECT_NAME}_FORMS_HEADERS})
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  PREFIX ""
+  CXX_STANDARD 17
+  CXX_EXTENSIONS OFF)
+
 target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} ${QEVERCLOUD_LIBRARIES})
 
 # Installation
@@ -108,43 +96,35 @@ if(APPLE OR WIN32)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/${PROJECT_NAME}.exe")
   endif()
 
-  if(USE_QT5)
-    if(APPLE)
-      set (MACDEPLOYQT_APP ${Qt5Core_DIR}/../../../bin/macdeployqt)
-      message(" - macdeployqt path: ${MACDEPLOYQT_APP}")
-    endif()
-    # we need to find path to windeployqt on windows
-    if (WIN32)
-      set (WINDEPLOYQT_APP ${Qt5Core_DIR}/../../../bin/windeployqt)
-      message(" - windeployqt path: ${WINDEPLOYQT_APP}")
-    endif()
+  if(APPLE)
+    set (MACDEPLOYQT_APP ${Qt5Core_DIR}/../../../bin/macdeployqt)
+    message(" - macdeployqt path: ${MACDEPLOYQT_APP}")
+  endif()
+  # we need to find path to windeployqt on windows
+  if (WIN32)
+    set (WINDEPLOYQT_APP ${Qt5Core_DIR}/../../../bin/windeployqt)
+    message(" - windeployqt path: ${WINDEPLOYQT_APP}")
   endif()
 
   install(TARGETS ${PROJECT_NAME}
           BUNDLE DESTINATION . COMPONENT Runtime
           RUNTIME DESTINATION bin COMPONENT Runtime)
 
-  if(USE_QT5)
-    if(APPLE)
-      install(CODE "
-      execute_process(COMMAND ${MACDEPLOYQT_APP} ${APPS})
-      " COMPONENT Runtime)
-    elseif(WIN32)
-      install(CODE "
-      execute_process(COMMAND ${WINDEPLOYQT_APP} ${APPS})
-      " COMPONENT Runtime)
-      # It is rather ugly but I don't know a better way really. If you do, please let me know
-      if(USE_QT5)
-        set(QEVERCLOUD_DLL libqt5qevercloud.dll)
-      else()
-        set(QEVERCLOUD_DLL libqt4qevercloud.dll)
-      endif()
-      install(FILES ${QEVERCLOUD_INCLUDE_DIRS}/../bin/${QEVERCLOUD_DLL} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
-      set(DEPLOYED_QEVERCLOUD_LIB "\${CMAKE_INSTALL_PREFIX}/bin/${QEVERCLOUD_DLL}")
-      install(CODE "
-      execute_process(COMMAND ${WINDEPLOYQT_APP} ${DEPLOYED_QEVERCLOUD_LIB})
-      " COMPONENT Runtime)
-    endif()
+  if(APPLE)
+    install(CODE "
+    execute_process(COMMAND ${MACDEPLOYQT_APP} ${APPS})
+    " COMPONENT Runtime)
+  elseif(WIN32)
+    install(CODE "
+    execute_process(COMMAND ${WINDEPLOYQT_APP} ${APPS})
+    " COMPONENT Runtime)
+    # It is rather ugly but I don't know a better way really. If you do, please let me know
+    set(QEVERCLOUD_DLL libqt5qevercloud.dll)
+    install(FILES ${QEVERCLOUD_INCLUDE_DIRS}/../bin/${QEVERCLOUD_DLL} DESTINATION ${CMAKE_INSTALL_PREFIX}/bin)
+    set(DEPLOYED_QEVERCLOUD_LIB "\${CMAKE_INSTALL_PREFIX}/bin/${QEVERCLOUD_DLL}")
+    install(CODE "
+    execute_process(COMMAND ${WINDEPLOYQT_APP} ${DEPLOYED_QEVERCLOUD_LIB})
+    " COMPONENT Runtime)
   endif()
 else()
   install(TARGETS ${PROJECT_NAME} DESTINATION bin)
