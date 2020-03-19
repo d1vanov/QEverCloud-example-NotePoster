@@ -12,7 +12,8 @@ MainWindow::MainWindow(QWidget * parent) :
 {
     m_pUi->setupUi(this);
 
-    m_pNoteStore = new NoteStore(settings()->noteStoreUrl(), settings()->authenticationToken(), this);
+    auto ctx = qevercloud::newRequestContext(settings()->authenticationToken());
+    m_pNoteStore = qevercloud::newNoteStore(settings()->noteStoreUrl(), ctx, this);
 
     // reading notebook names and guids
     QStringList notebookNames;

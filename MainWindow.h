@@ -28,7 +28,7 @@ private slots:
     void createNote();
 private:
     Ui::MainWindow * m_pUi;
-    qevercloud::NoteStore * m_pNoteStore;
+    qevercloud::INoteStore * m_pNoteStore;
     QMap<QString, QString> m_notebooks;
     bool m_inLoop;
 };
