@@ -10,10 +10,10 @@
 #ifndef QEVERCLOUD_EXAMPLE_NOTE_POSTER_MAIN_WINDOW_H
 #define QEVERCLOUD_EXAMPLE_NOTE_POSTER_MAIN_WINDOW_H
 
+#include <qevercloud/QEverCloud.h>
+
 #include <QDialog>
 #include <QTextCharFormat>
-
-#include <qevercloud/QEverCloud.h>
 
 namespace Ui {
 class MainWindow;

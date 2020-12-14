@@ -2,25 +2,23 @@ cmake_minimum_required(VERSION 3.5.1)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules")
 
-include(NotePosterCMakePolicies)
-SET_POLICIES()
-
 project(NotePoster VERSION 1.0.0)
 
-include(NotePosterSetupQt)
+find_package(Qt5 5.9.5 COMPONENTS Core Network Widgets REQUIRED)
+
 include(NotePosterCompilerSettings)
 
 find_package(QEverCloud-qt5 REQUIRED)
 
-include_directories(${QEVERCLOUD_INCLUDE_DIRS})
-
 set(HEADERS
     MainWindow.h
+    NotePosterApplication.h
     SettingsDialog.h
     Settings.h)
 
 set(SOURCES
     MainWindow.cpp
+    NotePosterApplication.cpp
     SettingsDialog.cpp
     Settings.cpp
     main.cpp)
@@ -31,7 +29,8 @@ set(FORMS
 
 qt5_wrap_ui(${PROJECT_NAME}_FORMS_HEADERS ${FORMS})
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(ICONS_DIR "${PROJECT_SOURCE_DIR}/icons")
 
@@ -44,7 +43,7 @@ if(APPLE)
   set(MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
   set(MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
   set(MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
-  set(MACOSX_BUNDLE_COPYRIGHT "(c) 2014 Sergey Skoblikov, 2015-2016 Dmitry Ivanov")
+  set(MACOSX_BUNDLE_COPYRIGHT "(c) 2014 Sergey Skoblikov, 2015-2020 Dmitry Ivanov")
   set(MACOSX_BUNDLE_ICON_FILE mainicon.icns)
   set(MACOSX_BUNDLE_ICON "${ICONS_DIR}/${MACOSX_BUNDLE_ICON_FILE}")
   set_source_files_properties(${MACOSX_BUNDLE_ICON} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
@@ -82,7 +81,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
   CXX_STANDARD 17
   CXX_EXTENSIONS OFF)
 
-target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES} qt5qevercloud)
+target_include_directories(${PROJECT_NAME}
+  PRIVATE
+  ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(${PROJECT_NAME}
+  PRIVATE
+  Qt5::Core
+  Qt5::Network
+  Qt5::Widgets
+  QEverCloud::qt5qevercloud)
 
 # Installation
 if(APPLE OR WIN32)

@@ -31,6 +31,9 @@ Settings::Settings(QObject * parent) :
     m_settings = new QSettings(iniPath, QSettings::IniFormat, this);
 }
 
+Settings::~Settings()
+{}
+
 QString Settings::host()
 {
     return m_settings->value("Evernote/host", QString()).toString().trimmed();

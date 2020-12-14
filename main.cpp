@@ -1,39 +1,24 @@
+/**
+ * Original work: Copyright (c) 2014 Sergey Skoblikov
+ * Modified work: Copyright (c) 2015-2020 Dmitry Ivanov
+ *
+ * This file is a part of QEverCloud-example-NotePoster project and is
+ * distributed under the terms of MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+
 #include "MainWindow.h"
+#include "NotePosterApplication.h"
 #include "SettingsDialog.h"
 
-#include <qt5qevercloud/Log.h>
+#include <qevercloud/Log.h>
 
-#include <QApplication>
+#include <QDebug>
 #include <QMessageBox>
-#include <QtDebug>
+
+#include <stdexcept>
 
 using namespace qevercloud;
-
-class NotePosterApplication: public QApplication
-{
-public:
-    bool notify(QObject * pObject, QEvent * pEvent);
-};
-
-bool NotePosterApplication::notify(QObject * pObject, QEvent * pEvent)
-{
-    try
-    {
-        return QApplication::notify(pObject, pEvent);
-    }
-    catch(const std::exception & exception)
-    {
-        qDebug() << exception.what();
-        quit();
-    }
-    catch(...)
-    {
-        qDebug() << "Unknown exception";
-        quit();
-    }
-
-    return false;
-}
 
 int main(int argc, char * argv[])
 {
