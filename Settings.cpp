@@ -1,4 +1,14 @@
+/**
+ * Original work: Copyright (c) 2014 Sergey Skoblikov
+ * Modified work: Copyright (c) 2015-2020 Dmitry Ivanov
+ *
+ * This file is a part of QEverCloud-example-NotePoster project and is
+ * distributed under the terms of MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+
 #include "Settings.h"
+
 #include <QApplication>
 #include <QDir>
 #include <QSettings>
@@ -6,7 +16,7 @@
 
 Settings * settings()
 {
-    static Settings * pSettings = 0;
+    static Settings * pSettings = nullptr;
     if (!pSettings) {
         pSettings = new Settings;
     }
@@ -14,7 +24,8 @@ Settings * settings()
     return pSettings;
 }
 
-Settings::Settings()
+Settings::Settings(QObject * parent) :
+    QObject(parent)
 {
     QString iniPath = QDir(qApp->applicationDirPath()).absoluteFilePath("NotePoster.ini");
     m_settings = new QSettings(iniPath, QSettings::IniFormat, this);

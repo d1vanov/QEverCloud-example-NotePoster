@@ -1,8 +1,17 @@
+/**
+ * Original work: Copyright (c) 2014 Sergey Skoblikov
+ * Modified work: Copyright (c) 2015-2020 Dmitry Ivanov
+ *
+ * This file is a part of QEverCloud-example-NotePoster project and is
+ * distributed under the terms of MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+
 #include "SettingsDialog.h"
 #include "ui_SettingsDialog.h"
 #include "Settings.h"
 
-#include <qt5qevercloud/QEverCloudOAuth.h>
+#include <qevercloud/QEverCloudOAuth.h>
 
 #include <QMessageBox>
 
@@ -27,9 +36,11 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::login()
 {
-    EvernoteOAuthDialog dialog(m_pUi->consumerKeyLineEdit->text().trimmed(),
-                               m_pUi->consumerSecretLineEdit->text().trimmed(),
-                               m_pUi->hostLineEdit->text().trimmed());
+    EvernoteOAuthDialog dialog(
+        m_pUi->consumerKeyLineEdit->text().trimmed(),
+        m_pUi->consumerSecretLineEdit->text().trimmed(),
+        m_pUi->hostLineEdit->text().trimmed());
+
     dialog.setWindowTitle("Log in to Evernote");
 
     if (dialog.exec() != QDialog::Accepted) {
@@ -37,15 +48,17 @@ void SettingsDialog::login()
         return;
     }
 
-    m_pUi->authenticationTokenLineEdit->setText(dialog.oauthResult().authenticationToken);
-    m_pUi->noteStoreUrlLineEdit->setText(dialog.oauthResult().noteStoreUrl);
+    const auto res = dialog.oauthResult();
+    m_pUi->authenticationTokenLineEdit->setText(res.authenticationToken);
+    m_pUi->noteStoreUrlLineEdit->setText(res.noteStoreUrl);
 }
 
 void SettingsDialog::onFinished()
 {
-    settings()->setHost(m_pUi->hostLineEdit->text());
-    settings()->setConsumerKey(m_pUi->consumerKeyLineEdit->text());
-    settings()->setConsumerSecret(m_pUi->consumerSecretLineEdit->text());
-    settings()->setNoteStoreUrl(m_pUi->noteStoreUrlLineEdit->text());
-    settings()->setAuthenticationToken(m_pUi->authenticationTokenLineEdit->text());
+    auto * s = settings();
+    s->setHost(m_pUi->hostLineEdit->text());
+    s->setConsumerKey(m_pUi->consumerKeyLineEdit->text());
+    s->setConsumerSecret(m_pUi->consumerSecretLineEdit->text());
+    s->setNoteStoreUrl(m_pUi->noteStoreUrlLineEdit->text());
+    s->setAuthenticationToken(m_pUi->authenticationTokenLineEdit->text());
 }

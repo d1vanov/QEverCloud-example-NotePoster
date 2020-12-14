@@ -1,14 +1,23 @@
+/**
+ * Original work: Copyright (c) 2014 Sergey Skoblikov
+ * Modified work: Copyright (c) 2015-2020 Dmitry Ivanov
+ *
+ * This file is a part of QEverCloud-example-NotePoster project and is
+ * distributed under the terms of MIT license:
+ * https://opensource.org/licenses/MIT
+ */
+
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 #include "Settings.h"
+
 #include <QMessageBox>
 
 using namespace qevercloud;
 
 MainWindow::MainWindow(QWidget * parent) :
     QDialog(parent),
-    m_pUi(new Ui::MainWindow),
-    m_inLoop(false)
+    m_pUi(new Ui::MainWindow)
 {
     m_pUi->setupUi(this);
 
@@ -26,10 +35,17 @@ MainWindow::MainWindow(QWidget * parent) :
     for(int i = 0; i < numNotebooks; i++)
     {
         const Notebook & notebook = notebooksList.at(i);
-        m_notebooks[notebook.name] = notebook.guid;
-        notebookNames << notebook.name;
-        if (notebook.defaultNotebook) {
-            defaultNotebookName = notebook.name;
+
+        const auto & notebookName = notebook.name();
+        Q_ASSERT(notebookName);
+
+        const auto & notebookGuid = notebook.guid();
+        Q_ASSERT(notebookGuid);
+
+        m_notebooks[*notebookName] = *notebookGuid;
+        notebookNames << *notebookName;
+        if (notebook.defaultNotebook()) {
+            defaultNotebookName = *notebookName;
         }
     }
 
@@ -39,9 +55,11 @@ MainWindow::MainWindow(QWidget * parent) :
     m_pUi->notebooksComboBox->setCurrentIndex(
         notebookNames.indexOf(defaultNotebookName));
 
-    connect(m_pUi->noteTextEdit,
-            SIGNAL(currentCharFormatChanged(QTextCharFormat)),
-            SLOT(currentCharFormatChanged(QTextCharFormat)));
+    QObject::connect(
+        m_pUi->noteTextEdit,
+        &QTextEdit::currentCharFormatChanged,
+        this,
+        &MainWindow::currentCharFormatChanged);
 }
 
 MainWindow::~MainWindow()
@@ -89,11 +107,16 @@ void MainWindow::createNote()
     try
     {
         Note note;
-        note.title = m_pUi->titleLineEdit->text().trimmed().left(EDAM_NOTE_TITLE_LEN_MAX);
-        note.notebookGuid = m_notebooks[m_pUi->notebooksComboBox->currentText()];
-        note.content = enml;
+        note.setTitle(m_pUi->titleLineEdit->text().trimmed().left(EDAM_NOTE_TITLE_LEN_MAX));
+        note.setNotebookGuid(m_notebooks[m_pUi->notebooksComboBox->currentText()]);
+        note.setContent(enml);
+
         note = m_pNoteStore->createNote(note);
-        QMessageBox::information(this, "Success", QString("Note GUID: %1").arg(note.guid));
+
+        const auto & noteGuid = note.guid();
+        Q_ASSERT(noteGuid);
+
+        QMessageBox::information(this, "Success", QString("Note GUID: %1").arg(*noteGuid));
     }
     catch(const std::exception & e)
     {
